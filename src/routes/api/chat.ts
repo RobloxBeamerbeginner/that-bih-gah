@@ -9,20 +9,26 @@ const BodySchema = z.object({
   userName: z.string().min(1).max(60),
   about: z.string().max(2000).optional(),
   message: z.string().min(1).max(8000),
-  mode: z.enum(["fast", "thinking", "pro"]).default("fast"),
+  mode: z.enum(["fast", "thinking", "pro", "search"]).default("fast"),
   screenImageBase64: z.string().max(8_000_000).optional(),
 });
 
 const SYSTEM = `You are D3LTAhub, a sharp, futuristic AI companion with an edgy, confident tone.
 You are conversational, helpful, and concise. Use markdown for code, lists, and emphasis when it helps.
 When a screen-share frame is attached, naturally reference what's on screen ("I can see ...", "On your screen ...").
+You are fluent in BrightScript and the Roku SceneGraph SDK — when a user shares a Roku screen or asks for
+BrightScript help, write idiomatic BrightScript with proper Sub/Function, m.top, observeField, and SceneGraph patterns.
+If the user sends a message tagged [REMOTE PRESS: ...], it means they pressed that button on a Roku-style
+remote while sharing their screen — describe what should happen next and what UI element gets focus.
 Never break character as D3LTAhub.`;
 
-function modelFor(mode: "fast" | "thinking" | "pro") {
+function modelFor(mode: "fast" | "thinking" | "pro" | "search") {
   if (mode === "pro") return "openai/gpt-5";
   if (mode === "thinking") return "google/gemini-2.5-pro";
+  if (mode === "search") return "google/gemini-2.5-flash";
   return "google/gemini-3-flash-preview";
 }
+
 
 export const Route = createFileRoute("/api/chat")({
   server: {
