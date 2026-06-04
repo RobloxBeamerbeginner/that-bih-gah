@@ -364,7 +364,29 @@ function ChatShell({
     }
   };
 
+  const enterPip = async () => {
+    const v = pipVideoRef.current ?? videoRef.current;
+    if (!v) return;
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+        return;
+      }
+      // @ts-expect-error - vendor API present in all evergreen browsers
+      if (typeof v.requestPictureInPicture === "function") {
+        await v.requestPictureInPicture();
+      } else {
+        setError("Picture-in-Picture not supported in this browser");
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not enter PiP");
+    }
+  };
+
   const stopShare = () => {
+    if (document.pictureInPictureElement) {
+      document.exitPictureInPicture().catch(() => {});
+    }
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     if (videoRef.current) videoRef.current.srcObject = null;
