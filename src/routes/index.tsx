@@ -733,6 +733,19 @@ function InputBar({
         >
           {sharing ? <MonitorOff className="w-4 h-4" /> : <Monitor className="w-4 h-4" />}
         </button>
+        <button
+          type="button"
+          onClick={onToggleRemote}
+          className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition ${
+            remoteOpen
+              ? "bg-gradient-delta text-black shadow-glow"
+              : "glass hover:bg-white/10"
+          }`}
+          aria-label="Roku remote"
+          title="Roku remote control"
+        >
+          <Gamepad2 className="w-4 h-4" />
+        </button>
         <textarea
           ref={inputRef}
           value={input}
