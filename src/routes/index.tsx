@@ -692,6 +692,8 @@ function InputBar({
   onSubmit,
   sharing,
   onToggleShare,
+  remoteOpen,
+  onToggleRemote,
   isStreaming,
   inputRef,
 }: {
@@ -700,6 +702,8 @@ function InputBar({
   onSubmit: (e: FormEvent) => void;
   sharing: boolean;
   onToggleShare: () => void;
+  remoteOpen: boolean;
+  onToggleRemote: () => void;
   isStreaming: boolean;
   inputRef: React.RefObject<HTMLTextAreaElement | null>;
 }) {
