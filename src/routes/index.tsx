@@ -242,6 +242,7 @@ function ChatShell({
 
   // Screen share
   const [sharing, setSharing] = useState(false);
+  const [remoteOpen, setRemoteOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const pipVideoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
