@@ -20,10 +20,14 @@ import {
   Zap,
   Brain,
   Crown,
+  Search,
+  Gamepad2,
+  PictureInPicture2,
   X,
   PanelLeft,
   Loader2,
 } from "lucide-react";
+import { RokuRemote, type RemotePress } from "@/components/RokuRemote";
 
 import {
   listConversations,
