@@ -779,9 +779,11 @@ function InputBar({
 function ScreenSharePiP({
   videoRef,
   onClose,
+  onPip,
 }: {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   onClose: () => void;
+  onPip: () => void;
 }) {
   return (
     <div className="fixed bottom-28 right-4 z-30 w-[300px] sm:w-[360px] glass-strong rounded-2xl overflow-hidden shadow-glow fade-in">
@@ -790,11 +792,21 @@ function ScreenSharePiP({
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
           <span className="font-medium">Live screen — D3LTAhub sees this</span>
         </div>
-        <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Stop share">
-          <X className="w-3.5 h-3.5" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={onPip}
+            className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-white/10"
+            aria-label="Pop out Picture-in-Picture"
+            title="Pop out (PiP)"
+          >
+            <PictureInPicture2 className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={onClose} className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-white/10" aria-label="Stop share">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
-      <video ref={videoRef} muted playsInline className="w-full aspect-video object-cover bg-black" />
+      <video ref={videoRef} muted playsInline autoPlay className="w-full aspect-video object-cover bg-black" />
     </div>
   );
 }
