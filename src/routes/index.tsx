@@ -72,6 +72,7 @@ const MODES = [
   { id: "fast" as const, label: "Fast", icon: Zap },
   { id: "thinking" as const, label: "Thinking", icon: Brain },
   { id: "pro" as const, label: "Pro", icon: Crown },
+  { id: "search" as const, label: "Search", icon: Search },
 ];
 
 const SUGGESTIONS = [
