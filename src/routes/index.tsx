@@ -372,9 +372,9 @@ function ChatShell({
         await document.exitPictureInPicture();
         return;
       }
-      // @ts-expect-error - vendor API present in all evergreen browsers
-      if (typeof v.requestPictureInPicture === "function") {
-        await v.requestPictureInPicture();
+      const anyV = v as HTMLVideoElement & { requestPictureInPicture?: () => Promise<PictureInPictureWindow> };
+      if (typeof anyV.requestPictureInPicture === "function") {
+        await anyV.requestPictureInPicture();
       } else {
         setError("Picture-in-Picture not supported in this browser");
       }
