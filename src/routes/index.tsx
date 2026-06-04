@@ -457,7 +457,20 @@ function ChatShell({
       </main>
 
       {sharing && (
-        <ScreenSharePiP videoRef={pipVideoRef} onClose={stopShare} />
+        <ScreenSharePiP videoRef={pipVideoRef} onClose={stopShare} onPip={enterPip} />
+      )}
+
+      {remoteOpen && (
+        <RokuRemote
+          onClose={() => setRemoteOpen(false)}
+          onPress={(key: RemotePress, label: string) => {
+            if (key === "brightscript") {
+              void send("Give me a concise BrightScript example for a Roku SceneGraph component that handles remote key events (up/down/OK), with `onKeyEvent` and `observeField`.");
+            } else {
+              void send(`[REMOTE PRESS: ${key}] ${label}${sharing ? " (while screen sharing)" : ""}. What should happen next?`);
+            }
+          }}
+        />
       )}
 
       <InputBar
@@ -466,9 +479,12 @@ function ChatShell({
         onSubmit={onSubmit}
         sharing={sharing}
         onToggleShare={sharing ? stopShare : startShare}
+        remoteOpen={remoteOpen}
+        onToggleRemote={() => setRemoteOpen((o) => !o)}
         isStreaming={isStreaming}
         inputRef={inputRef}
       />
+
 
       <SettingsPanel
         open={settingsOpen}
