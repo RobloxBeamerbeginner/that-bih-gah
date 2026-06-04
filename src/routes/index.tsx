@@ -20,10 +20,14 @@ import {
   Zap,
   Brain,
   Crown,
+  Search,
+  Gamepad2,
+  PictureInPicture2,
   X,
   PanelLeft,
   Loader2,
 } from "lucide-react";
+import { RokuRemote, type RemotePress } from "@/components/RokuRemote";
 
 import {
   listConversations,
@@ -68,6 +72,7 @@ const MODES = [
   { id: "fast" as const, label: "Fast", icon: Zap },
   { id: "thinking" as const, label: "Thinking", icon: Brain },
   { id: "pro" as const, label: "Pro", icon: Crown },
+  { id: "search" as const, label: "Search", icon: Search },
 ];
 
 const SUGGESTIONS = [
@@ -237,6 +242,7 @@ function ChatShell({
 
   // Screen share
   const [sharing, setSharing] = useState(false);
+  const [remoteOpen, setRemoteOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const pipVideoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -358,7 +364,29 @@ function ChatShell({
     }
   };
 
+  const enterPip = async () => {
+    const v = pipVideoRef.current ?? videoRef.current;
+    if (!v) return;
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+        return;
+      }
+      const anyV = v as HTMLVideoElement & { requestPictureInPicture?: () => Promise<PictureInPictureWindow> };
+      if (typeof anyV.requestPictureInPicture === "function") {
+        await anyV.requestPictureInPicture();
+      } else {
+        setError("Picture-in-Picture not supported in this browser");
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not enter PiP");
+    }
+  };
+
   const stopShare = () => {
+    if (document.pictureInPictureElement) {
+      document.exitPictureInPicture().catch(() => {});
+    }
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     if (videoRef.current) videoRef.current.srcObject = null;
@@ -429,7 +457,20 @@ function ChatShell({
       </main>
 
       {sharing && (
-        <ScreenSharePiP videoRef={pipVideoRef} onClose={stopShare} />
+        <ScreenSharePiP videoRef={pipVideoRef} onClose={stopShare} onPip={enterPip} />
+      )}
+
+      {remoteOpen && (
+        <RokuRemote
+          onClose={() => setRemoteOpen(false)}
+          onPress={(key: RemotePress, label: string) => {
+            if (key === "brightscript") {
+              void send("Give me a concise BrightScript example for a Roku SceneGraph component that handles remote key events (up/down/OK), with `onKeyEvent` and `observeField`.");
+            } else {
+              void send(`[REMOTE PRESS: ${key}] ${label}${sharing ? " (while screen sharing)" : ""}. What should happen next?`);
+            }
+          }}
+        />
       )}
 
       <InputBar
@@ -438,9 +479,12 @@ function ChatShell({
         onSubmit={onSubmit}
         sharing={sharing}
         onToggleShare={sharing ? stopShare : startShare}
+        remoteOpen={remoteOpen}
+        onToggleRemote={() => setRemoteOpen((o) => !o)}
         isStreaming={isStreaming}
         inputRef={inputRef}
       />
+
 
       <SettingsPanel
         open={settingsOpen}
@@ -648,6 +692,8 @@ function InputBar({
   onSubmit,
   sharing,
   onToggleShare,
+  remoteOpen,
+  onToggleRemote,
   isStreaming,
   inputRef,
 }: {
@@ -656,6 +702,8 @@ function InputBar({
   onSubmit: (e: FormEvent) => void;
   sharing: boolean;
   onToggleShare: () => void;
+  remoteOpen: boolean;
+  onToggleRemote: () => void;
   isStreaming: boolean;
   inputRef: React.RefObject<HTMLTextAreaElement | null>;
 }) {
@@ -684,6 +732,19 @@ function InputBar({
           aria-label={sharing ? "Stop screen share" : "Start screen share"}
         >
           {sharing ? <MonitorOff className="w-4 h-4" /> : <Monitor className="w-4 h-4" />}
+        </button>
+        <button
+          type="button"
+          onClick={onToggleRemote}
+          className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition ${
+            remoteOpen
+              ? "bg-gradient-delta text-black shadow-glow"
+              : "glass hover:bg-white/10"
+          }`}
+          aria-label="Roku remote"
+          title="Roku remote control"
+        >
+          <Gamepad2 className="w-4 h-4" />
         </button>
         <textarea
           ref={inputRef}
@@ -718,9 +779,11 @@ function InputBar({
 function ScreenSharePiP({
   videoRef,
   onClose,
+  onPip,
 }: {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   onClose: () => void;
+  onPip: () => void;
 }) {
   return (
     <div className="fixed bottom-28 right-4 z-30 w-[300px] sm:w-[360px] glass-strong rounded-2xl overflow-hidden shadow-glow fade-in">
@@ -729,11 +792,21 @@ function ScreenSharePiP({
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
           <span className="font-medium">Live screen — D3LTAhub sees this</span>
         </div>
-        <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Stop share">
-          <X className="w-3.5 h-3.5" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={onPip}
+            className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-white/10"
+            aria-label="Pop out Picture-in-Picture"
+            title="Pop out (PiP)"
+          >
+            <PictureInPicture2 className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={onClose} className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-white/10" aria-label="Stop share">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
-      <video ref={videoRef} muted playsInline className="w-full aspect-video object-cover bg-black" />
+      <video ref={videoRef} muted playsInline autoPlay className="w-full aspect-video object-cover bg-black" />
     </div>
   );
 }

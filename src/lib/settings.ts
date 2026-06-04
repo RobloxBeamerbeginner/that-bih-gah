@@ -17,7 +17,7 @@ export type Settings = {
   glassBlur: number; // 0-40 px
   background: BackgroundKind;
   backgroundUrl: string; // for image/video
-  mode: "fast" | "thinking" | "pro";
+  mode: "fast" | "thinking" | "pro" | "search";
   bootShown: boolean;
 };
 
