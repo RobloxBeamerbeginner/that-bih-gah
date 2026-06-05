@@ -69,7 +69,12 @@ export function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return DEFAULT_SETTINGS;
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw);
+    return {
+      ...DEFAULT_SETTINGS,
+      ...parsed,
+      remoteMap: { ...DEFAULT_REMOTE_MAP, ...(parsed.remoteMap ?? {}) },
+    };
   } catch {
     return DEFAULT_SETTINGS;
   }
