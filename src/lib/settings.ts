@@ -8,6 +8,20 @@ export type ThemePreset =
 
 export type BackgroundKind = "aurora" | "solid" | "gradient" | "image" | "video";
 
+export type RemoteKey =
+  | "up" | "down" | "left" | "right" | "ok"
+  | "home" | "back" | "play" | "pause"
+  | "rewind" | "forward" | "voldown" | "volup" | "mute"
+  | "info" | "voice" | "brightscript";
+
+export const DEFAULT_REMOTE_MAP: Record<RemoteKey, string> = {
+  up: "Up", down: "Down", left: "Left", right: "Right", ok: "OK",
+  home: "Home", back: "Back", play: "Play", pause: "Pause",
+  rewind: "Rewind", forward: "Fast forward",
+  voldown: "Volume down", volup: "Volume up", mute: "Mute",
+  info: "Options *", voice: "Voice search", brightscript: "BrightScript help",
+};
+
 export type Settings = {
   name: string;
   avatarUrl: string;
@@ -19,6 +33,7 @@ export type Settings = {
   backgroundUrl: string; // for image/video
   mode: "fast" | "thinking" | "pro" | "search";
   bootShown: boolean;
+  remoteMap: Record<RemoteKey, string>;
 };
 
 const KEY = "d3ltahub_settings_v2";
@@ -34,6 +49,7 @@ export const DEFAULT_SETTINGS: Settings = {
   backgroundUrl: "",
   mode: "fast",
   bootShown: false,
+  remoteMap: { ...DEFAULT_REMOTE_MAP },
 };
 
 export const THEME_PRESETS: Record<
@@ -53,7 +69,12 @@ export function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return DEFAULT_SETTINGS;
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw);
+    return {
+      ...DEFAULT_SETTINGS,
+      ...parsed,
+      remoteMap: { ...DEFAULT_REMOTE_MAP, ...(parsed.remoteMap ?? {}) },
+    };
   } catch {
     return DEFAULT_SETTINGS;
   }

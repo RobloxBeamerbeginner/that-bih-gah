@@ -1,6 +1,6 @@
-import { X, Camera } from "lucide-react";
+import { X, Camera, RotateCcw } from "lucide-react";
 import { useRef, useState } from "react";
-import { THEME_PRESETS, type Settings, type ThemePreset, type BackgroundKind } from "@/lib/settings";
+import { THEME_PRESETS, DEFAULT_REMOTE_MAP, type Settings, type ThemePreset, type BackgroundKind, type RemoteKey } from "@/lib/settings";
 import bgMinecraft from "@/assets/bg-minecraft.asset.json";
 import bgHunt from "@/assets/bg-hunt.asset.json";
 
@@ -224,6 +224,54 @@ export function SettingsPanel({
               )}
             </>
           )}
+        </Section>
+
+        <Section title="Roku Remote — Remap buttons">
+          <p className="text-xs text-muted-foreground mb-3">
+            Rename any button. Presses are tagged as{" "}
+            <span className="font-mono text-white/80">[REMOTE PRESS: key]</span> and sent with
+            your current screen frame (when sharing).
+          </p>
+          <div className="grid grid-cols-1 gap-1.5">
+            {(Object.keys(DEFAULT_REMOTE_MAP) as RemoteKey[]).map((k) => (
+              <div key={k} className="flex items-center gap-2">
+                <span className="w-24 shrink-0 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                  {k}
+                </span>
+                <input
+                  value={settings.remoteMap[k] ?? ""}
+                  onChange={(e) =>
+                    update("remoteMap", { ...settings.remoteMap, [k]: e.target.value })
+                  }
+                  placeholder={DEFAULT_REMOTE_MAP[k]}
+                  maxLength={40}
+                  className="flex-1 glass rounded-md px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+                {settings.remoteMap[k] !== DEFAULT_REMOTE_MAP[k] && (
+                  <button
+                    onClick={() =>
+                      update("remoteMap", {
+                        ...settings.remoteMap,
+                        [k]: DEFAULT_REMOTE_MAP[k],
+                      })
+                    }
+                    className="text-muted-foreground hover:text-white"
+                    title="Reset to default"
+                    aria-label={`Reset ${k}`}
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={() => update("remoteMap", { ...DEFAULT_REMOTE_MAP })}
+            className="mt-3 w-full glass rounded-lg py-2 text-xs hover:bg-white/10 flex items-center justify-center gap-1.5"
+          >
+            <RotateCcw className="w-3 h-3" />
+            Reset all to defaults
+          </button>
         </Section>
       </aside>
     </div>
