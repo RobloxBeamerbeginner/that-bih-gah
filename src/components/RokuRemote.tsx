@@ -15,26 +15,28 @@ import {
   X,
   Code2,
   Mic,
-  Star,
   Asterisk,
+  CheckCircle2,
 } from "lucide-react";
+import { DEFAULT_REMOTE_MAP, type RemoteKey } from "@/lib/settings";
 
-export type RemotePress =
-  | "up" | "down" | "left" | "right" | "ok"
-  | "home" | "back" | "play" | "pause"
-  | "rewind" | "forward" | "voldown" | "volup" | "mute"
-  | "info" | "voice" | "brightscript";
+export type RemotePress = RemoteKey;
 
 export function RokuRemote({
   onPress,
   onClose,
+  labelMap,
+  lastPress,
 }: {
   onPress: (key: RemotePress, label: string) => void;
   onClose: () => void;
+  labelMap?: Partial<Record<RemoteKey, string>>;
+  lastPress?: { key: RemoteKey; label: string; frame: boolean; at: number } | null;
 }) {
   const [playing, setPlaying] = useState(true);
+  const lbl = (k: RemoteKey) => labelMap?.[k]?.trim() || DEFAULT_REMOTE_MAP[k];
 
-  const press = (k: RemotePress, label: string) => onPress(k, label);
+  const press = (k: RemotePress) => onPress(k, lbl(k));
 
   return (
     <div className="fixed top-24 right-4 z-30 w-[230px] glass-strong rounded-3xl p-3 shadow-glow fade-in select-none">
