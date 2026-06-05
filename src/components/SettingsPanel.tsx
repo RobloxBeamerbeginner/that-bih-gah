@@ -1,6 +1,6 @@
-import { X, Camera } from "lucide-react";
+import { X, Camera, RotateCcw } from "lucide-react";
 import { useRef, useState } from "react";
-import { THEME_PRESETS, type Settings, type ThemePreset, type BackgroundKind } from "@/lib/settings";
+import { THEME_PRESETS, DEFAULT_REMOTE_MAP, type Settings, type ThemePreset, type BackgroundKind, type RemoteKey } from "@/lib/settings";
 import bgMinecraft from "@/assets/bg-minecraft.asset.json";
 import bgHunt from "@/assets/bg-hunt.asset.json";
 
