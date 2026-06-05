@@ -8,6 +8,20 @@ export type ThemePreset =
 
 export type BackgroundKind = "aurora" | "solid" | "gradient" | "image" | "video";
 
+export type RemoteKey =
+  | "up" | "down" | "left" | "right" | "ok"
+  | "home" | "back" | "play" | "pause"
+  | "rewind" | "forward" | "voldown" | "volup" | "mute"
+  | "info" | "voice" | "brightscript";
+
+export const DEFAULT_REMOTE_MAP: Record<RemoteKey, string> = {
+  up: "Up", down: "Down", left: "Left", right: "Right", ok: "OK",
+  home: "Home", back: "Back", play: "Play", pause: "Pause",
+  rewind: "Rewind", forward: "Fast forward",
+  voldown: "Volume down", volup: "Volume up", mute: "Mute",
+  info: "Options *", voice: "Voice search", brightscript: "BrightScript help",
+};
+
 export type Settings = {
   name: string;
   avatarUrl: string;
