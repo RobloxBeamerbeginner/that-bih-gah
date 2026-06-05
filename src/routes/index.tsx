@@ -464,11 +464,15 @@ function ChatShell({
       {remoteOpen && (
         <RokuRemote
           onClose={() => setRemoteOpen(false)}
+          labelMap={settings.remoteMap}
+          lastPress={lastPress}
           onPress={(key: RemotePress, label: string) => {
+            const frame = sharing && !!videoRef.current?.videoWidth;
+            setLastPress({ key, label, frame, at: Date.now() });
             if (key === "brightscript") {
-              void send("Give me a concise BrightScript example for a Roku SceneGraph component that handles remote key events (up/down/OK), with `onKeyEvent` and `observeField`.");
+              void send(`[REMOTE PRESS: ${key}] ${label}. Give me a concise BrightScript example for a Roku SceneGraph component that handles remote key events (up/down/OK) using onKeyEvent and observeField.`);
             } else {
-              void send(`[REMOTE PRESS: ${key}] ${label}${sharing ? " (while screen sharing)" : ""}. What should happen next?`);
+              void send(`[REMOTE PRESS: ${key}] ${label}${frame ? " (screen frame attached)" : ""}. What should happen next?`);
             }
           }}
         />
