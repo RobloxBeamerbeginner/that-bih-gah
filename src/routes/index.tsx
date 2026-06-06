@@ -547,7 +547,11 @@ function TopBar({
               return (
                 <button
                   key={m.id}
-                  onClick={() => setSettings({ ...settings, mode: m.id })}
+                  onClick={() => {
+                    if (active) return;
+                    setSettings({ ...settings, mode: m.id });
+                    onNewChat();
+                  }}
                   className={`pill px-3 py-1.5 text-xs font-medium flex items-center gap-1.5 transition ${
                     active
                       ? "bg-gradient-delta text-black shadow-glow"
