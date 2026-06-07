@@ -21,13 +21,11 @@ import {
   Brain,
   Crown,
   Search,
-  Gamepad2,
   PictureInPicture2,
   X,
   PanelLeft,
   Loader2,
 } from "lucide-react";
-import { RokuRemote, type RemotePress } from "@/components/RokuRemote";
 
 import {
   listConversations,
@@ -37,7 +35,6 @@ import {
 } from "@/lib/chat.functions";
 import { D3LTALogo, SparkleIcon } from "@/components/D3LTALogo";
 import { BackgroundLayer } from "@/components/BackgroundLayer";
-import { BootScreen } from "@/components/BootScreen";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import {
   loadSettings,
@@ -45,6 +42,8 @@ import {
   applyTheme,
   getClientId,
   DEFAULT_SETTINGS,
+  DEFAULT_REMOTE_MAP,
+  type RemoteKey,
   type Settings,
 } from "@/lib/settings";
 
@@ -83,7 +82,6 @@ const SUGGESTIONS = [
 ];
 
 function IndexPage() {
-  const [booted, setBooted] = useState(false);
   const [clientId, setClientId] = useState("");
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -95,7 +93,6 @@ function IndexPage() {
     const s = loadSettings();
     setSettings(s);
     applyTheme(s);
-    setBooted(s.bootShown);
   }, []);
 
   // Persist + apply theme on change
@@ -106,19 +103,12 @@ function IndexPage() {
     }
   }, [settings, clientId]);
 
-  const onBootDone = () => {
-    const s = { ...settings, bootShown: true };
-    setSettings(s);
-    setBooted(true);
-  };
-
   if (!clientId) return null;
 
   return (
     <>
       <BackgroundLayer settings={settings} />
-      {!booted && <BootScreen onDone={onBootDone} />}
-      {booted && (!settings.name ? (
+      {!settings.name ? (
         <NamePrompt onSubmit={(name) => setSettings({ ...settings, name })} />
       ) : (
         <ChatShell
@@ -130,7 +120,7 @@ function IndexPage() {
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
         />
-      ))}
+      )}
     </>
   );
 }
@@ -242,8 +232,6 @@ function ChatShell({
 
   // Screen share
   const [sharing, setSharing] = useState(false);
-  const [remoteOpen, setRemoteOpen] = useState(false);
-  const [lastPress, setLastPress] = useState<{ key: RemotePress; label: string; frame: boolean; at: number } | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const pipVideoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -397,6 +385,42 @@ function ChatShell({
 
   useEffect(() => () => stopShare(), []);
 
+  // Roku-style remote controls via keyboard. Trigger with Ctrl+Alt+<key>
+  // so we never hijack normal typing. Sends a tagged message (and attaches
+  // the current screen frame if sharing). Mapping is overridable via
+  // settings.remoteMap labels.
+  useEffect(() => {
+    const KEYMAP: Record<string, RemoteKey> = {
+      ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
+      Enter: "ok", Backspace: "back", Escape: "back",
+      h: "home", H: "home",
+      i: "info", I: "info",
+      m: "mute", M: "mute",
+      ",": "rewind", ".": "forward",
+      " ": "play",
+      "+": "volup", "=": "volup", "-": "voldown",
+      v: "voice", V: "voice",
+      b: "brightscript", B: "brightscript",
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey && e.altKey)) return;
+      const key = KEYMAP[e.key];
+      if (!key) return;
+      e.preventDefault();
+      const label = settings.remoteMap?.[key]?.trim() || DEFAULT_REMOTE_MAP[key];
+      const frame = sharing && !!videoRef.current?.videoWidth;
+      if (key === "brightscript") {
+        void send(`[REMOTE PRESS: ${key}] ${label}. Give me a concise BrightScript example for a Roku SceneGraph component that handles remote key events (up/down/OK) using onKeyEvent and observeField.`);
+      } else {
+        void send(`[REMOTE PRESS: ${key}] ${label}${frame ? " (screen frame attached)" : ""}. What should happen next?`);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sharing, settings.remoteMap]);
+
+
   const onDeleteConv = async (id: string) => {
     if (!confirm("Delete this conversation?")) return;
     await del({ data: { id } });
@@ -461,31 +485,12 @@ function ChatShell({
         <ScreenSharePiP videoRef={pipVideoRef} onClose={stopShare} onPip={enterPip} />
       )}
 
-      {remoteOpen && (
-        <RokuRemote
-          onClose={() => setRemoteOpen(false)}
-          labelMap={settings.remoteMap}
-          lastPress={lastPress}
-          onPress={(key: RemotePress, label: string) => {
-            const frame = sharing && !!videoRef.current?.videoWidth;
-            setLastPress({ key, label, frame, at: Date.now() });
-            if (key === "brightscript") {
-              void send(`[REMOTE PRESS: ${key}] ${label}. Give me a concise BrightScript example for a Roku SceneGraph component that handles remote key events (up/down/OK) using onKeyEvent and observeField.`);
-            } else {
-              void send(`[REMOTE PRESS: ${key}] ${label}${frame ? " (screen frame attached)" : ""}. What should happen next?`);
-            }
-          }}
-        />
-      )}
-
       <InputBar
         input={input}
         setInput={setInput}
         onSubmit={onSubmit}
         sharing={sharing}
         onToggleShare={sharing ? stopShare : startShare}
-        remoteOpen={remoteOpen}
-        onToggleRemote={() => setRemoteOpen((o) => !o)}
         isStreaming={isStreaming}
         inputRef={inputRef}
       />
@@ -701,8 +706,6 @@ function InputBar({
   onSubmit,
   sharing,
   onToggleShare,
-  remoteOpen,
-  onToggleRemote,
   isStreaming,
   inputRef,
 }: {
@@ -711,8 +714,6 @@ function InputBar({
   onSubmit: (e: FormEvent) => void;
   sharing: boolean;
   onToggleShare: () => void;
-  remoteOpen: boolean;
-  onToggleRemote: () => void;
   isStreaming: boolean;
   inputRef: React.RefObject<HTMLTextAreaElement | null>;
 }) {
@@ -741,19 +742,6 @@ function InputBar({
           aria-label={sharing ? "Stop screen share" : "Start screen share"}
         >
           {sharing ? <MonitorOff className="w-4 h-4" /> : <Monitor className="w-4 h-4" />}
-        </button>
-        <button
-          type="button"
-          onClick={onToggleRemote}
-          className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition ${
-            remoteOpen
-              ? "bg-gradient-delta text-black shadow-glow"
-              : "glass hover:bg-white/10"
-          }`}
-          aria-label="Roku remote"
-          title="Roku remote control"
-        >
-          <Gamepad2 className="w-4 h-4" />
         </button>
         <textarea
           ref={inputRef}
