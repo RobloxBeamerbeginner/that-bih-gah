@@ -82,7 +82,6 @@ const SUGGESTIONS = [
 ];
 
 function IndexPage() {
-  const [booted, setBooted] = useState(false);
   const [clientId, setClientId] = useState("");
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -94,7 +93,6 @@ function IndexPage() {
     const s = loadSettings();
     setSettings(s);
     applyTheme(s);
-    setBooted(s.bootShown);
   }, []);
 
   // Persist + apply theme on change
@@ -105,19 +103,12 @@ function IndexPage() {
     }
   }, [settings, clientId]);
 
-  const onBootDone = () => {
-    const s = { ...settings, bootShown: true };
-    setSettings(s);
-    setBooted(true);
-  };
-
   if (!clientId) return null;
 
   return (
     <>
       <BackgroundLayer settings={settings} />
-      {!booted && <BootScreen onDone={onBootDone} />}
-      {booted && (!settings.name ? (
+      {!settings.name ? (
         <NamePrompt onSubmit={(name) => setSettings({ ...settings, name })} />
       ) : (
         <ChatShell
@@ -129,7 +120,7 @@ function IndexPage() {
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
         />
-      ))}
+      )}
     </>
   );
 }
