@@ -449,31 +449,12 @@ function ChatShell({
         <ScreenSharePiP videoRef={pipVideoRef} onClose={stopShare} onPip={enterPip} />
       )}
 
-      {remoteOpen && (
-        <RokuRemote
-          onClose={() => setRemoteOpen(false)}
-          labelMap={settings.remoteMap}
-          lastPress={lastPress}
-          onPress={(key: RemotePress, label: string) => {
-            const frame = sharing && !!videoRef.current?.videoWidth;
-            setLastPress({ key, label, frame, at: Date.now() });
-            if (key === "brightscript") {
-              void send(`[REMOTE PRESS: ${key}] ${label}. Give me a concise BrightScript example for a Roku SceneGraph component that handles remote key events (up/down/OK) using onKeyEvent and observeField.`);
-            } else {
-              void send(`[REMOTE PRESS: ${key}] ${label}${frame ? " (screen frame attached)" : ""}. What should happen next?`);
-            }
-          }}
-        />
-      )}
-
       <InputBar
         input={input}
         setInput={setInput}
         onSubmit={onSubmit}
         sharing={sharing}
         onToggleShare={sharing ? stopShare : startShare}
-        remoteOpen={remoteOpen}
-        onToggleRemote={() => setRemoteOpen((o) => !o)}
         isStreaming={isStreaming}
         inputRef={inputRef}
       />
