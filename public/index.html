@@ -3,23 +3,77 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>D3LTAhub</title>
-    <meta name="description" content="D3LTAhub — a sharp, futuristic AI companion with streaming chat, screen-share vision, and a Roku-style remote." />
+    <title>D3LTAhub — Your AI co-pilot</title>
+    <meta name="description" content="D3LTAhub — a futuristic AI companion with streaming chat, screen-share vision, and Roku-style keyboard controls." />
     <meta name="theme-color" content="#0a0a0f" />
 
-    <meta property="og:title" content="D3LTAhub" />
-    <meta property="og:description" content="A sharp, futuristic AI companion with streaming chat, screen-share vision, and a Roku-style remote." />
+    <meta property="og:title" content="D3LTAhub — Your AI co-pilot" />
+    <meta property="og:description" content="Streaming AI chat with screen-share vision." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://huggable-data-sync.lovable.app/" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="D3LTAhub" />
-    <meta name="twitter:description" content="A sharp, futuristic AI companion with streaming chat, screen-share vision, and a Roku-style remote." />
+    <meta name="twitter:title" content="D3LTAhub — Your AI co-pilot" />
+    <meta name="twitter:description" content="Streaming AI chat with screen-share vision." />
 
     <link rel="icon" href="/favicon.ico" />
+    <link rel="canonical" href="https://huggable-data-sync.lovable.app/" />
+
+    <!-- Belt-and-braces redirect to the SSR app at "/" -->
+    <meta http-equiv="refresh" content="0; url=/" />
+
+    <style>
+      :root { color-scheme: dark; }
+      html, body {
+        margin: 0; padding: 0; height: 100%;
+        background: radial-gradient(ellipse at top, #1a0b2e 0%, #050208 60%, #000 100%);
+        color: #e9e7ff;
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap {
+        min-height: 100%;
+        display: grid; place-items: center;
+        text-align: center;
+        padding: 24px;
+      }
+      .logo {
+        width: 72px; height: 72px; margin: 0 auto 18px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #b14bff 0%, #4be1ff 100%);
+        box-shadow: 0 0 40px rgba(177, 75, 255, 0.55);
+        display: grid; place-items: center;
+        font-weight: 800; color: #0a0a0f; font-size: 30px;
+      }
+      h1 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.01em; }
+      .grad { background: linear-gradient(90deg, #b14bff, #4be1ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      p { margin: 0 0 18px; color: #b9b6d6; font-size: 14px; }
+      a.btn {
+        display: inline-block; padding: 10px 18px; border-radius: 999px;
+        background: linear-gradient(90deg, #b14bff, #4be1ff);
+        color: #0a0a0f; font-weight: 600; text-decoration: none;
+        box-shadow: 0 8px 30px rgba(75, 225, 255, 0.25);
+      }
+      .dots { margin-top: 14px; opacity: .7; font-size: 12px; letter-spacing: .25em; text-transform: uppercase; }
+      .dots span { animation: blink 1.2s infinite; }
+      .dots span:nth-child(2) { animation-delay: .2s; }
+      .dots span:nth-child(3) { animation-delay: .4s; }
+      @keyframes blink { 0%, 80%, 100% { opacity: .2 } 40% { opacity: 1 } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script>window.location.replace("/");</script>
+    <div class="wrap">
+      <main>
+        <div class="logo" aria-hidden="true">Δ</div>
+        <h1><span style="color:#fff">D3LTA</span><span class="grad">hub</span></h1>
+        <p>Loading your AI co-pilot…</p>
+        <a class="btn" href="/">Enter D3LTAhub</a>
+        <div class="dots" aria-hidden="true"><span>•</span><span>•</span><span>•</span></div>
+      </main>
+    </div>
+    <script>
+      // JS-based redirect (runs before <meta refresh> for instant nav)
+      try { window.location.replace("/"); } catch (e) {}
+    </script>
   </body>
 </html>
