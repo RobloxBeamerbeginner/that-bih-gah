@@ -385,6 +385,42 @@ function ChatShell({
 
   useEffect(() => () => stopShare(), []);
 
+  // Roku-style remote controls via keyboard. Trigger with Ctrl+Alt+<key>
+  // so we never hijack normal typing. Sends a tagged message (and attaches
+  // the current screen frame if sharing). Mapping is overridable via
+  // settings.remoteMap labels.
+  useEffect(() => {
+    const KEYMAP: Record<string, RemoteKey> = {
+      ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
+      Enter: "ok", Backspace: "back", Escape: "back",
+      h: "home", H: "home",
+      i: "info", I: "info",
+      m: "mute", M: "mute",
+      ",": "rewind", ".": "forward",
+      " ": "play",
+      "+": "volup", "=": "volup", "-": "voldown",
+      v: "voice", V: "voice",
+      b: "brightscript", B: "brightscript",
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey && e.altKey)) return;
+      const key = KEYMAP[e.key];
+      if (!key) return;
+      e.preventDefault();
+      const label = settings.remoteMap?.[key]?.trim() || DEFAULT_REMOTE_MAP[key];
+      const frame = sharing && !!videoRef.current?.videoWidth;
+      if (key === "brightscript") {
+        void send(`[REMOTE PRESS: ${key}] ${label}. Give me a concise BrightScript example for a Roku SceneGraph component that handles remote key events (up/down/OK) using onKeyEvent and observeField.`);
+      } else {
+        void send(`[REMOTE PRESS: ${key}] ${label}${frame ? " (screen frame attached)" : ""}. What should happen next?`);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sharing, settings.remoteMap]);
+
+
   const onDeleteConv = async (id: string) => {
     if (!confirm("Delete this conversation?")) return;
     await del({ data: { id } });
