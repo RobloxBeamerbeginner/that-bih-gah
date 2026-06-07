@@ -21,13 +21,11 @@ import {
   Brain,
   Crown,
   Search,
-  Gamepad2,
   PictureInPicture2,
   X,
   PanelLeft,
   Loader2,
 } from "lucide-react";
-import { RokuRemote, type RemotePress } from "@/components/RokuRemote";
 
 import {
   listConversations,
@@ -37,7 +35,6 @@ import {
 } from "@/lib/chat.functions";
 import { D3LTALogo, SparkleIcon } from "@/components/D3LTALogo";
 import { BackgroundLayer } from "@/components/BackgroundLayer";
-import { BootScreen } from "@/components/BootScreen";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import {
   loadSettings,
@@ -45,6 +42,8 @@ import {
   applyTheme,
   getClientId,
   DEFAULT_SETTINGS,
+  DEFAULT_REMOTE_MAP,
+  type RemoteKey,
   type Settings,
 } from "@/lib/settings";
 
